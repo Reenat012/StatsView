@@ -2,6 +2,7 @@ package ru.netology.statsview.ui.Stats
 
 import android.content.Context
 import android.graphics.Canvas
+import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.PointF
 import android.graphics.RectF
@@ -54,7 +55,7 @@ class StatsView @JvmOverloads constructor(
         }
 
     //создаем прямоугольник, который нужен ля отрисовки дуги
-    var oval = RectF()
+    private var oval = RectF()
 
     //точка центра, для отрисовки окружности относительно ее
     private var center = PointF()
@@ -66,6 +67,7 @@ class StatsView @JvmOverloads constructor(
         style = Paint.Style.STROKE
         strokeJoin = Paint.Join.ROUND
         strokeCap = Paint.Cap.ROUND
+
     }
 
     //кисть для отрисовки текста
@@ -75,6 +77,14 @@ class StatsView @JvmOverloads constructor(
         textSize = this@StatsView.textSize
         style = Paint.Style.FILL
         textAlign = Paint.Align.CENTER
+    }
+
+    //отрисовка точки
+    private val paintPoint = Paint().apply {
+        strokeWidth = lineWidth.toFloat()
+        style = Paint.Style.STROKE
+        strokeJoin = Paint.Join.ROUND
+        strokeCap = Paint.Cap.ROUND
     }
 
     override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
@@ -138,6 +148,10 @@ class StatsView @JvmOverloads constructor(
             center.y + textPaint.textSize / 4, //корректировочный к-т
             textPaint
         )
+
+        paintPoint.color = colors[0]
+        //отрисовка точки
+        canvas.drawPoint(center.y, center.y - radius, paintPoint)
     }
 
     private fun generateRandomColor() = Random.nextInt(0xFF000000.toInt(), 0xFFFFFFFF.toInt())
