@@ -1,5 +1,6 @@
 package ru.netology.statsview.ui.Stats
 
+import android.animation.ValueAnimator
 import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Color
@@ -8,6 +9,7 @@ import android.graphics.PointF
 import android.graphics.RectF
 import android.util.AttributeSet
 import android.view.View
+import android.view.animation.LinearInterpolator
 import androidx.core.content.withStyledAttributes
 import ru.netology.statsview.R
 import ru.netology.statsview.ui.Stats.utils.AndroidUtils
@@ -46,12 +48,15 @@ class StatsView @JvmOverloads constructor(
 
     private var radius = 0F
 
+    private var progress = 0F
+    private var valueAnimatoir: ValueAnimator? = null
+
     //процент загрузки
     var data: List<Float> = emptyList()
         set(value) {
             field = value
             //провоцируем вызов функци onDraw()
-            invalidate()
+            update()
         }
 
     //создаем прямоугольник, который нужен ля отрисовки дуги
@@ -134,7 +139,7 @@ class StatsView @JvmOverloads constructor(
             paint.color = colors.getOrElse(index) { generateRandomColor() }
 
             //отрисовываем дугу
-            canvas.drawArc(oval, startAngle, angle, false, paint)
+            canvas.drawArc(oval, startAngle, angle * progress, false, paint)
 
             //чтобы не рисовать на одном месте добавим отступ к стартавому углу поворота
             startAngle += angle
@@ -152,6 +157,25 @@ class StatsView @JvmOverloads constructor(
         paintPoint.color = colors[0]
         //отрисовка точки
         canvas.drawPoint(center.y, center.y - radius, paintPoint)
+    }
+
+    private fun update() {
+        valueAnimatoir?.let {
+            it.removeAllUpdateListeners()
+            it.cancel()
+        }
+        progress = 0F
+
+        valueAnimatoir = ValueAnimator.ofFloat(0F, 1F).apply {
+            addUpdateListener { anim ->
+                progress = anim.animatedValue as Float
+                invalidate()
+            }
+            duration = 500
+            interpolator = LinearInterpolator()
+        }.also {
+            it.start()
+        }
     }
 
     private fun generateRandomColor() = Random.nextInt(0xFF000000.toInt(), 0xFFFFFFFF.toInt())
