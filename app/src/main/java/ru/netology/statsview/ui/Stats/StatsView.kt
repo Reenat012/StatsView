@@ -13,6 +13,7 @@ import android.view.animation.LinearInterpolator
 import androidx.core.content.withStyledAttributes
 import ru.netology.statsview.R
 import ru.netology.statsview.ui.Stats.utils.AndroidUtils
+import kotlin.io.path.Path
 import kotlin.math.min
 import kotlin.random.Random
 
@@ -129,17 +130,17 @@ class StatsView @JvmOverloads constructor(
         }
 
         //обойдем список элементов и рассчитаем угол поворота каждого
-        data.forEachIndexed {index, datum ->
-            var datumPercent = datum / sumData
+        data.forEachIndexed { index, datum ->
+            val datumPercent = datum / sumData
 
-            var angle = datumPercent * 360F
+            val angle = datumPercent * 360F
 
             //назначим каждому элементу свой цвет
             //рассчитываем случайный цвет, который находится от черного до белого
             paint.color = colors.getOrElse(index) { generateRandomColor() }
 
             //отрисовываем дугу
-            canvas.drawArc(oval, startAngle, angle * progress, false, paint)
+            canvas.drawArc(oval, startAngle / progress , angle * progress, false, paint)
 
             //чтобы не рисовать на одном месте добавим отступ к стартавому углу поворота
             startAngle += angle
@@ -148,15 +149,17 @@ class StatsView @JvmOverloads constructor(
         //отрисовка текста
         canvas.drawText(
             //сумма всех элементов умноженная на 100
-            "%.2f%%".format(sumData/20),
+            "%.2f%%".format(sumData / 20),
             center.x,
             center.y + textPaint.textSize / 4, //корректировочный к-т
             textPaint
         )
 
         paintPoint.color = colors[0]
+
         //отрисовка точки
         canvas.drawPoint(center.y, center.y - radius, paintPoint)
+
     }
 
     private fun update() {
@@ -171,8 +174,9 @@ class StatsView @JvmOverloads constructor(
                 progress = anim.animatedValue as Float
                 invalidate()
             }
-            duration = 500
+            duration = 1000
             interpolator = LinearInterpolator()
+
         }.also {
             it.start()
         }
